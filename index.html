@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Elara AI — parevie</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* ROOT VARIABLES (Dark mode default) */
+:root {
+    --bg-gradient-start: #0a0f1e;
+    --bg-gradient-end: #020617;
+    --screen-bg: rgba(11, 18, 32, 0.65);
+    --screen-border: rgba(56, 189, 248, 0.35);
+    --header-bg: linear-gradient(135deg, rgba(56, 189, 248, 0.12), rgba(6, 182, 212, 0.05));
+    --header-text: #b9e6ff;
+    --user-msg-bg: linear-gradient(135deg, #1e2a3e, #0f172a);
+    --user-msg-text: #e2e8f0;
+    --bot-msg-bg: linear-gradient(115deg, #0c4a6e, #0284c7);
+    --bot-msg-text: #f0f9ff;
+    --input-bg: rgba(15, 25, 45, 0.7);
+    --input-border: #2d3a5e;
+    --input-text: #f1f5f9;
+    --input-placeholder: #7e8aa2;
+    --btn-bg: linear-gradient(95deg, #0ea5e9, #3b82f6);
+    --btn-hover: linear-gradient(95deg, #38bdf8, #2563eb);
+    --menu-bg: rgba(8, 14, 26, 0.7);
+    --menu-text: #cbd5e6;
+    --toggle-bg: rgba(56, 189, 248, 0.2);
+}
+
+/* Light Mode */
+body.light-mode {
+    --bg-gradient-start: #e2e8f0;
+    --bg-gradient-end: #cbd5e1;
+    --screen-bg: rgba(245, 248, 250, 0.85);
+    --screen-border: rgba(2, 106, 162, 0.4);
+    --header-bg: linear-gradient(135deg, rgba(2, 106, 162, 0.1), rgba(56, 189, 248, 0.15));
+    --header-text: #0c4a6e;
+    --user-msg-bg: linear-gradient(135deg, #e0f2fe, #bae6fd);
+    --user-msg-text: #0f172a;
+    --bot-msg-bg: linear-gradient(115deg, #0284c7, #38bdf8);
+    --bot-msg-text: #ffffff;
+    --input-bg: #ffffff;
+    --input-border: #94a3b8;
+    --input-text: #1e293b;
+    --input-placeholder: #64748b;
+    --btn-bg: linear-gradient(95deg, #0284c7, #0ea5e9);
+    --btn-hover: linear-gradient(95deg, #0c4a6e, #0284c7);
+    --menu-bg: rgba(255, 255, 255, 0.8);
+    --menu-text: #0f172a;
+    --toggle-bg: rgba(2, 106, 162, 0.25);
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: radial-gradient(circle at 20% 30%, var(--bg-gradient-start), var(--bg-gradient-end));
+    font-family: 'Inter', sans-serif;
+    transition: background 0.3s ease;
+}
+
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+/* MAIN MONITOR */
+.screen {
+    width: 100%;
+    max-width: 1300px;
+    height: 90vh;
+    background: var(--screen-bg);
+    backdrop-filter: blur(2px);
+    border-radius: 38px;
+    border: 1px solid var(--screen-border);
+    box-shadow: 0 25px 45px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(56, 189, 248, 0.1) inset, 0 0 30px rgba(56, 189, 248, 0.2);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+/* HEADER */
+.header {
+    padding: 18px 24px;
+    font-size: 1.25rem;
+    font-weight: 500;
+    background: var(--header-bg);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+    letter-spacing: -0.2px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--header-text);
+}
+
+.header i {
+    font-size: 1.5rem;
+    filter: drop-shadow(0 0 4px #38bdf8);
+}
+
+.header span {
+    background: linear-gradient(135deg, #e0f2fe, #7dd3fc);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    font-weight: 600;
+}
+
+/* CHAT BOX */
+.chat-box {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 24px;
+    scroll-behavior: smooth;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.chat-box::-webkit-scrollbar {
+    width: 5px;
+}
+
+.chat-box::-webkit-scrollbar-track {
+    background: rgba(15, 25, 45, 0.5);
+    border-radius: 10px;
+}
+
+.chat-box::-webkit-scrollbar-thumb {
+    background: #38bdf8;
+    border-radius: 10px;
+}
+
+/* MESSAGE BUBBLE */
+.msg {
+    max-width: 78%;
+    padding: 12px 18px;
+    border-radius: 26px;
+    font-size: 0.9rem;
+    line-height: 1.45;
+    font-weight: 450;
+    letter-spacing: -0.2px;
+    word-wrap: break-word;
+    animation: fadeSlideUp 0.25s ease-out;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes fadeSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.user {
+    background: var(--user-msg-bg);
+    color: var(--user-msg-text);
+    border-bottom-right-radius: 6px;
+    margin-left: auto;
+    border: 1px solid rgba(56, 189, 248, 0.2);
+}
+
+.bot {
+    background: var(--bot-msg-bg);
+    color: var(--bot-msg-text);
+    border-bottom-left-radius: 6px;
+    margin-right: auto;
+    backdrop-filter: blur(2px);
+    box-shadow: 0 4px 12px rgba(0, 160, 255, 0.15);
+}
+
+/* INPUT AREA — FLEX dengan proporsi tepat agar tombol selalu terlihat */
+.input-area {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 24px;
+    background: rgba(5, 10, 25, 0.5);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(56, 189, 248, 0.25);
+}
+
+.input-area input {
+    flex: 1;
+    min-width: 0; /* mencegah overflow */
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    padding: 14px 18px;
+    border-radius: 40px;
+    font-size: 0.9rem;
+    color: var(--input-text);
+    font-family: 'Inter', monospace;
+    transition: all 0.2s;
+}
+
+.input-area input:focus {
+    outline: none;
+    border-color: #38bdf8;
+    box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.3);
+}
+
+.input-area input::placeholder {
+    color: var(--input-placeholder);
+}
+
+/* BUTTON KIRIM — HANYA IKON PANAH, UKURAN TETAP, TIDAK BISA MENYUSUT */
+.input-area button {
+    flex-shrink: 0;
+    width: 52px;
+    height: 52px;
+    background: var(--btn-bg);
+    border: none;
+    border-radius: 40px;
+    color: white;
+    font-size: 1.4rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0, 110, 255, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.input-area button i {
+    font-size: 1.3rem;
+}
+
+.input-area button:hover {
+    transform: scale(1.02);
+    background: var(--btn-hover);
+    box-shadow: 0 6px 18px rgba(56, 189, 248, 0.5);
+}
+
+/* TOGGLE BUTTON */
+#toggle-btn {
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--toggle-bg);
+    backdrop-filter: blur(8px);
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 30px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    z-index: 1001;
+    transition: all 0.25s;
+    border: 1px solid rgba(56, 189, 248, 0.5);
+    color: #b4e6ff;
+}
+
+#toggle-btn:hover {
+    background: #38bdf8;
+    color: #021018;
+    transform: translateY(-50%) scale(1.05);
+}
+
+/* MENU PANEL */
+#menu-panel {
+    position: absolute;
+    right: -210px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 180px;
+    background: var(--menu-bg);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    padding: 16px 12px;
+    transition: right 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    z-index: 1000;
+}
+
+#menu-panel.active {
+    right: 20px;
+}
+
+#menu-panel h4 {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 14px;
+    color: #7dd3fc;
+    border-left: 3px solid #38bdf8;
+    padding-left: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+#menu-panel button {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: none;
+    margin-bottom: 8px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--menu-text);
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+#menu-panel button i {
+    width: 22px;
+    font-size: 0.9rem;
+    color: #64b5f6;
+}
+
+#menu-panel button:hover {
+    background: rgba(56, 189, 248, 0.25);
+    transform: translateX(4px);
+    color: white;
+}
+
+/* Theme toast */
+.theme-toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #0f172ad9;
+    backdrop-filter: blur(12px);
+    padding: 8px 20px;
+    border-radius: 40px;
+    color: white;
+    font-size: 0.8rem;
+    z-index: 2000;
+    pointer-events: none;
+    animation: fadeOut 2s forwards;
+}
+
+@keyframes fadeOut {
+    0% { opacity: 1; }
+    70% { opacity: 1; }
+    100% { opacity: 0; visibility: hidden; }
+}
+
+/* RESPONSIVE */
+@media (max-width: 560px) {
+    .screen { height: 92vh; border-radius: 28px; }
+    .msg { max-width: 88%; font-size: 0.8rem; padding: 10px 14px; }
+    .input-area button { width: 48px; height: 48px; }
+    .input-area button i { font-size: 1.2rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="screen">
+    <div class="header">
+        <i class="fas fa-moon-stars"></i>
+        <span>ELARA AI</span> 
+        <span style="font-size: 0.7rem; opacity: 0.8; margin-left: 6px;">✦ parevie</span>
+    </div>
+    
+    <div id="chat-box" class="chat-box"></div>
+
+    <div class="input-area">
+        <input id="user-input" placeholder="Ketik pesan MJ ..." autocomplete="off">
+        <!-- Tombol Kirim hanya icon panah, tanpa teks -->
+        <button onclick="sendMessage()">
+            <i class="fas fa-paper-plane"></i>
+        </button>
+    </div>
+
+    <div id="toggle-btn" onclick="toggleMenu()">
+        <i class="fas fa-chevron-right"></i>
+    </div>
+
+    <div id="menu-panel">
+        <h4><i class="fas fa-bolt"></i> MENU</h4>
+        <button onclick="newChat()"><i class="fas fa-plus-circle"></i> Chat Baru</button>
+        <button id="uploadBtn"><i class="fas fa-upload"></i> Upload</button>
+        <button id="historyBtn"><i class="fas fa-history"></i> Riwayat</button>
+        <button id="settingsBtn"><i class="fas fa-sliders-h"></i> Mode</button>
+    </div>
+</div>
+
+<input type="file" id="fileInput" style="display: none;">
+
+<script>
+const chatBox = document.getElementById("chat-box");
+const userInput = document.getElementById("user-input");
+const fileInput = document.getElementById("fileInput");
+
+function addMessage(type, text, isHtml = false) {
+    const msg = document.createElement("div");
+    msg.className = "msg " + (type === "user" ? "user" : "bot");
+    if (isHtml) {
+        msg.innerHTML = text;
+    } else {
+        const icon = type === "user" ? '<i class="fas fa-user-astronaut" style="font-size: 10px; margin-right: 6px;"></i>' : '<i class="fas fa-robot" style="font-size: 10px; margin-right: 6px;"></i>';
+        msg.innerHTML = `${icon} ${escapeHtml(text)}`;
+    }
+    chatBox.appendChild(msg);
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+    });
+}
+
+async function sendMessage() {
+    const text = userInput.value.trim();
+    if (!text) return;
+
+    addMessage("user", text);
+    userInput.value = "";
+
+    try {
+        const res = await fetch("/generate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ prompt: text })
+        });
+        const data = await res.json();
+        const reply = data.response || data?.bot_reply || data?.message || (typeof data === 'string' ? data : "✨ Respon diterima.");
+        addMessage("bot", reply);
+    } catch (error) {
+        console.error(error);
+        addMessage("bot", "⚠️ Gangguan koneksi. Server tidak merespon.");
+    }
+}
+
+function newChat() {
+    chatBox.innerHTML = "";
+    addMessage("bot", "✨ Ruang obrolan baru dimulai. Kirim pesan apa pun.");
+}
+
+// UPLOAD file
+function triggerUpload() {
+    fileInput.click();
+}
+
+fileInput.addEventListener("change", function(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const fileName = file.name;
+    const fileSize = (file.size / 1024).toFixed(2) + " KB";
+    addMessage("user", `📎 Upload file: ${fileName} (${fileSize})`);
+    addMessage("bot", `📁 File "${fileName}" berhasil diterima. (Simulasi — siap diproses lebih lanjut.)`);
+    fileInput.value = "";
+});
+
+// DARK / LIGHT MODE
+function toggleTheme() {
+    const body = document.body;
+    const isLight = body.classList.contains("light-mode");
+    if (isLight) {
+        body.classList.remove("light-mode");
+        showToast("🌙 Mode Gelap aktif");
+        localStorage.setItem("elaraTheme", "dark");
+    } else {
+        body.classList.add("light-mode");
+        showToast("☀️ Mode Terang aktif");
+        localStorage.setItem("elaraTheme", "light");
+    }
+}
+
+function showToast(message) {
+    const toast = document.createElement("div");
+    toast.className = "theme-toast";
+    toast.innerText = message;
+    document.body.appendChild(toast);
+    setTimeout(() => { toast.remove(); }, 2000);
+}
+
+function loadTheme() {
+    const saved = localStorage.getItem("elaraTheme");
+    if (saved === "light") {
+        document.body.classList.add("light-mode");
+    } else {
+        document.body.classList.remove("light-mode");
+    }
+}
+
+// MENU TOGGLE
+let isMenuOpen = false;
+function toggleMenu() {
+    const panel = document.getElementById("menu-panel");
+    const btn = document.getElementById("toggle-btn");
+    isMenuOpen = !isMenuOpen;
+    if (isMenuOpen) {
+        panel.classList.add("active");
+        btn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+    } else {
+        panel.classList.remove("active");
+        btn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+    }
+}
+
+// Event listeners menu
+document.getElementById("uploadBtn").addEventListener("click", triggerUpload);
+document.getElementById("settingsBtn").addEventListener("click", () => {
+    toggleTheme();
+    if (isMenuOpen) toggleMenu();
+});
+document.getElementById("historyBtn").addEventListener("click", () => {
+    addMessage("bot", "📜 Fitur riwayat percakapan akan segera hadir.");
+    if (isMenuOpen) toggleMenu();
+});
+
+userInput.addEventListener("keypress", function(e) {
+    if (e.key === "Enter") {
+        e.preventDefault();
+        sendMessage();
+    }
+});
+
+window.addEventListener("DOMContentLoaded", () => {
+    loadTheme();
+    addMessage("bot", "👋 Halo, aku Elara. Siap membantu & berkreasi bersamamu.");
+});
+</script>
+</body>
+</html>
