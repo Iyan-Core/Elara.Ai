@@ -12,3 +12,12 @@ Elara AI adalah aplikasi chatbot berbasis web yang dikembangkan oleh MJ.
 
 ## Author
 MJ-Core
+
+root repo/
+├── webapk.conf
+├── assets/
+│   └── icon.png
+├── app/
+├── gradlew
+├── .github/workflows/build-apk.yml
+└── ...
