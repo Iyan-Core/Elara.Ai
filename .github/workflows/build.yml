@@ -2,15 +2,18 @@ name: Build WebToApk
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "master" ]
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+    - uses: actions/checkout@v4
+
+    - name: Decode Keystore
+      run: |
+        echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > app/my-release-key.jks
 
     - name: Set up JDK 17
       uses: actions/setup-java@v4
@@ -30,5 +33,5 @@ jobs:
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: Elara-Ai-App
+        name: ElaraAi
         path: app/build/outputs/apk/release/*.apk
