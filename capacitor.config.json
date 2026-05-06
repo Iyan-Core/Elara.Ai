@@ -2,7 +2,5 @@
   "appId": "com.mj.elaraai",
   "appName": "Elara Ai",
   "webDir": "www",
-  "server": {
-    "androidScheme": "https"
-  }
+  "bundledWebRuntime": false
 }
