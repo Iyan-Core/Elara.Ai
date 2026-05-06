@@ -10,82 +10,85 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      # 📥 Checkout repo
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
+      # ⚙️ Setup Node.js
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 18
+          cache: npm
 
-      - name: Install dependencies
+      # 📦 Install dependencies (INI SUDAH CUKUP)
+      - name: Install Dependencies
         run: npm install
 
-      - name: Install Capacitor Android
-        run: npm install @capacitor/android
+      # ⚡ Sync Capacitor (WAJIB sebelum build Android)
+      - name: Sync Capacitor
+        run: npx cap sync android
 
-      - name: Init Capacitor
-        run: npx cap init "Elara Ai" "com.mj.elaraai" --web-dir=www
-
-      - name: Add Android
-        run: npx cap add android
-
+      # 📁 Copy web assets (kalau ada update www/build)
       - name: Copy Web Assets
-        run: npx cap copy
+        run: npx cap copy android
 
-      # 🔐 Decode keystore dari Base64
+      # 🔐 Decode Keystore
       - name: Decode Keystore
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/app/elara-key.jks
 
-      # 🔐 Setup signing config
-      - name: Setup Signing
+      # 🔐 Setup Signing Properties
+      - name: Setup Signing Config
         run: |
           echo "MYAPP_UPLOAD_STORE_FILE=elara-key.jks" >> android/gradle.properties
           echo "MYAPP_UPLOAD_KEY_ALIAS=${{ secrets.KEY_ALIAS }}" >> android/gradle.properties
           echo "MYAPP_UPLOAD_STORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }}" >> android/gradle.properties
           echo "MYAPP_UPLOAD_KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}" >> android/gradle.properties
 
-      # 🔧 Inject signing ke build.gradle
+      # 🛠 Inject signing ke Gradle (safe version)
       - name: Configure Gradle Signing
         run: |
           sed -i '/android {/a\
-              signingConfigs {\n\
-                  release {\n\
-                      storeFile file(MYAPP_UPLOAD_STORE_FILE)\n\
-                      storePassword MYAPP_UPLOAD_STORE_PASSWORD\n\
-                      keyAlias MYAPP_UPLOAD_KEY_ALIAS\n\
-                      keyPassword MYAPP_UPLOAD_KEY_PASSWORD\n\
-                  }\n\
-              }\n\
-              buildTypes {\n\
-                  release {\n\
-                      signingConfig signingConfigs.release\n\
-                      minifyEnabled false\n\
-                  }\n\
-              }' android/app/build.gradle
+          signingConfigs {\
+              release {\
+                  storeFile file(MYAPP_UPLOAD_STORE_FILE)\
+                  storePassword MYAPP_UPLOAD_STORE_PASSWORD\
+                  keyAlias MYAPP_UPLOAD_KEY_ALIAS\
+                  keyPassword MYAPP_UPLOAD_KEY_PASSWORD\
+              }\
+          }\
+          buildTypes {\
+              release {\
+                  signingConfig signingConfigs.release\
+                  minifyEnabled false\
+              }\
+          }' android/app/build.gradle
 
-      # 🛠 Build DEBUG
+      # 🔧 Setup Gradle permission
+      - name: Grant Execute Permission
+        run: chmod +x android/gradlew
+
+      # 🧪 Build Debug APK
       - name: Build Debug APK
         run: |
           cd android
-          chmod +x gradlew
           ./gradlew assembleDebug
 
-      # 🚀 Build RELEASE (SIGNED)
+      # 🚀 Build Release APK (SIGNED)
       - name: Build Release APK
         run: |
           cd android
           ./gradlew assembleRelease
 
-      # 📦 Upload Debug
+      # 📦 Upload Debug APK
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         with:
           name: elaraai-debug
           path: android/app/build/outputs/apk/debug/app-debug.apk
 
-      # 📦 Upload Release
+      # 📦 Upload Release APK
       - name: Upload Release APK
         uses: actions/upload-artifact@v4
         with:
