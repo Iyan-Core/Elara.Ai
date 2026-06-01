@@ -1,6 +1,13 @@
 {
-  "appId": "com.mj.elaraai",
-  "appName": "Elara Ai",
+  "appId": "com.mj.elara.ai",
+  "appName": "Elara.Ai",
   "webDir": "www",
-  "bundledWebRuntime": false
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0
+    }
+  }
 }
