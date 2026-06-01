@@ -32,16 +32,13 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      # ← TAMBAHAN: generate folder android/
-      - name: Add Android platform
-        run: npx cap add android
-
+      # TIDAK perlu cap add, langsung sync saja
       - name: Capacitor Sync
         run: npx cap sync android
 
+      # Pastikan gradlew bisa dieksekusi
       - name: Make gradlew executable
-        working-directory: android
-        run: chmod +x gradlew
+        run: chmod +x android/gradlew
 
       - name: Build Debug APK
         working-directory: android
