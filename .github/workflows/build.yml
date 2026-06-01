@@ -32,8 +32,16 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
+      # ← TAMBAHAN: generate folder android/
+      - name: Add Android platform
+        run: npx cap add android
+
       - name: Capacitor Sync
         run: npx cap sync android
+
+      - name: Make gradlew executable
+        working-directory: android
+        run: chmod +x gradlew
 
       - name: Build Debug APK
         working-directory: android
