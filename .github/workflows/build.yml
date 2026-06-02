@@ -43,35 +43,43 @@ jobs:
       - name: Update SDK Versions
         run: |
           sed -i 's/minSdkVersion = .*/minSdkVersion = 24/' android/variables.gradle
-          sed -i 's/compileSdkVersion = .*/compileSdkVersion = 35/' android/variables.gradle
-          sed -i 's/targetSdkVersion = .*/targetSdkVersion = 35/' android/variables.gradle
+          sed -i 's/compileSdkVersion = .*/compileSdkVersion = 34/' android/variables.gradle
+          sed -i 's/targetSdkVersion = .*/targetSdkVersion = 34/' android/variables.gradle
 
-      # Decode keystore dari secret
+      # Fix path keystore pakai absolute path
       - name: Decode Keystore
         run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/release.keystore
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > $GITHUB_WORKSPACE/release.keystore
+          echo "Keystore path: $GITHUB_WORKSPACE/release.keystore"
+          ls -la $GITHUB_WORKSPACE/release.keystore
 
       - name: Make gradlew executable
         run: chmod +x android/gradlew
 
-      # Build Release APK dengan signing
       - name: Build Signed Release APK
         working-directory: android
         env:
+          KEYSTORE_PATH: ${{ github.workspace }}/release.keystore
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           ./gradlew assembleRelease \
-            -Pandroid.injected.signing.store.file=../app/release.keystore \
+            -Pandroid.injected.signing.store.file=$KEYSTORE_PATH \
             -Pandroid.injected.signing.store.password=$KEYSTORE_PASSWORD \
             -Pandroid.injected.signing.key.alias=$KEY_ALIAS \
             -Pandroid.injected.signing.key.password=$KEY_PASSWORD \
             --no-daemon
 
+      # Rename APK
+      - name: Rename APK
+        run: |
+          mv android/app/build/outputs/apk/release/app-release.apk \
+             android/app/build/outputs/apk/release/Elaraai.apk
+
       - name: Upload Signed APK
         uses: actions/upload-artifact@v4
         with:
           name: elara-ai-release-apk
-          path: android/app/build/outputs/apk/release/app-release.apk
+          path: android/app/build/outputs/apk/release/Elaraai.apk
           retention-days: 7
