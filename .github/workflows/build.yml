@@ -40,6 +40,15 @@ jobs:
       - name: Capacitor Sync
         run: npx cap sync android
 
+      # Fix untuk Android 15
+      - name: Update SDK Versions
+        run: |
+          sed -i 's/minSdkVersion = .*/minSdkVersion = 24/' android/variables.gradle
+          sed -i 's/compileSdkVersion = .*/compileSdkVersion = 35/' android/variables.gradle
+          sed -i 's/targetSdkVersion = .*/targetSdkVersion = 35/' android/variables.gradle
+          echo "=== variables.gradle ==="
+          cat android/variables.gradle
+
       - name: Make gradlew executable
         run: chmod +x android/gradlew
 
