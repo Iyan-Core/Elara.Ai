@@ -15,6 +15,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # ✅ TAMBAHAN: Masukkan API Key dari Secrets ke file HTML
+      - name: Inject Gemini API Key
+        run: |
+          sed -i "s|AIzaSy_xxxx_xxxx_KUNCI_ANDA_DISINI|${{ secrets.GEMINI_API_KEY }}|g" www/index.html
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
